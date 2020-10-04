@@ -1,6 +1,7 @@
 import boto3
 import csv
 import os
+import uuid
 from datetime import datetime
 from pytz import timezone
 
@@ -16,6 +17,7 @@ def queue_sms(sms):
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(os.environ['TABLE_NAME'])
     table.put_item(Item={
+        'id': 'SMS' + str(uuid.uuid4().int)[0:16],
         'from': sms['from'],
         'to': sms['to'],
         'send_at': sms['send_at'], # any timezone stuff needed here?
