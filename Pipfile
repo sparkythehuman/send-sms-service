@@ -6,6 +6,8 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 pylint = "*"
+pytest-mock = "*"
+pytest-xdist = "*"
 
 [packages]
 boto3 = "==1.15.11"
