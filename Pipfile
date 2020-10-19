@@ -10,15 +10,8 @@ pytest-mock = "*"
 pytest-xdist = "*"
 
 [packages]
-boto3 = "==1.15.11"
-botocore = "==1.18.11"
-futures = "==3.3.0"
-jmespath = "==0.10.0"
-python-dateutil = "==2.8.1"
-s3transfer = "==0.3.3"
-six = "==1.15.0"
-urllib3 = "==1.25.10"
+boto3 = "*"
 pytz = "*"
 
 [requires]
-python_version = "2.7"
+python_version = "3.8"
