@@ -1,8 +1,10 @@
 import io
 import pytest
+import uuid
 from src.main import handle
 from datetime import datetime
 from pytz import timezone
+
 
 s3_event = {
     'Records': [{
@@ -50,7 +52,7 @@ def mock_datetime(mocker, mock_now):
 @pytest.fixture
 def mock_uuid4(mocker):
     mock_uuid4 = mocker.patch('src.main.uuid4')
-    mock_uuid4.int.return_value = mocker.Mock()
+    mock_uuid4.return_value = uuid.UUID('77f1df52-4b43-11e9-910f-b8ca3a9b9f3e')
     yield mock_uuid4
 
 
@@ -74,7 +76,7 @@ def test_main(mocker, mock_dynamodb, mock_s3, mock_now, mock_uuid4):
     assert mock_dynamodb.mock_calls == [
         mocker.call.Table('test-table'),
         mocker.call.Table().put_item(Item={
-            'id': 'SMS' + str(mock_uuid4)[0:16],
+            'id': 'SMS1594340045386552',
             'status': 'queued', 
             'from': '+15058675309', 
             'created_at': mock_now.isoformat(), 
