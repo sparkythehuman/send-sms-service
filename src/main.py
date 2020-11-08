@@ -1,7 +1,7 @@
 import boto3
 import csv
 import os
-from boto3.dynamodb.conditions import Key, And
+from boto3.dynamodb.conditions import And, Attr, Key
 from uuid import uuid4
 from datetime import datetime
 from pytz import timezone
@@ -18,11 +18,18 @@ def _get_phone_numbers_from_file(file):
         yield row
 
 
-def _find(**kwargs):
-    key_condition_expressions = [ Key(key).eq(value) for key, value in kwargs.items() ]
-    data = table.query(
-        KeyConditionExpression=And(*key_condition_expressions)
-    )
+def _find(username, **kwargs):
+    query_params = {
+        'KeyConditionExpression': Key('username').eq(username),
+    }
+    if kwargs:
+        filter_condition_expressions = [ Attr(key).eq(value) for key, value in kwargs.items() ]
+        if len(filter_condition_expressions) > 1:
+            query_params['FilterExpression'] = And(*filter_condition_expressions)
+        elif len(filter_condition_expressions) == 1:
+            query_params['FilterExpression'] = filter_condition_expressions[0]
+    
+    data = table.query(**query_params)
 
     return data['Items']
 
@@ -55,7 +62,7 @@ def _create(event, context):
     for phone_number in _get_phone_numbers_from_file(event['phone-numbers-csv']):
         table.put_item(Item={
             'id': 'PHN' + str(uuid4().int)[0:16],
-            'name': phone_number['name'],
+            'contact_name': phone_number['name'],
             'phone_number': phone_number['phone_number'],
             'contact_list_id': event['contact-list-id'],
             'username': _get_username(context), 
