@@ -23,6 +23,7 @@ def _find(**kwargs):
     data = table.query(
         KeyConditionExpression=And(*key_condition_expressions)
     )
+
     return data['Items']
 
 
@@ -36,33 +37,33 @@ def _response(phone_numbers):
 def _get(event, context):
     phone_numbers = _find(
         username=_get_username(context),
-        list_id=event['list-id']
+        contact_list_id=event['contact-list-id']
     )
 
     return _response(phone_numbers)
 
 
 def _create(event, context):
-    # first delete all phone numbers from the list
+    # first delete all phone numbers from the contact_list
     for phone_number in _find(
         username=_get_username(context),
-        list_id=event['list-id']
+        contact_list_id=event['contact-list-id']
     ):
         table.delete_item(Key=phone_number['id'])
 
-    # then add the new phone numbers to to the list
+    # then add the new phone numbers to to the contact_list
     for phone_number in _get_phone_numbers_from_file(event['phone-numbers-csv']):
         table.put_item(Item={
             'id': 'PHN' + str(uuid4().int)[0:16],
             'name': phone_number['name'],
             'phone_number': phone_number['phone_number'],
-            'list_id': event['list-id'],
+            'contact_list_id': event['contact-list-id'],
             'username': _get_username(context), 
             'created_at': datetime.now(tz=timezone('America/Denver')).isoformat(),
             'updated_at': datetime.now(tz=timezone('America/Denver')).isoformat(),
         })
         
-    # return the new list of phone numbers
+    # return the new contact_list of phone numbers
     return _get(event, context) 
 
 
