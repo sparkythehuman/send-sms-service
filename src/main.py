@@ -7,7 +7,7 @@ from datetime import datetime
 from pytz import timezone
 
 
-table = boto3.resource('dynamodb').Table(os.environ['TABLE_NAME'])
+contact = boto3.resource('dynamodb').Table('contact')
 
 def _get_username(context):
     return context['authorizer']['claims']['cognito:username']
@@ -20,6 +20,7 @@ def _get_phone_numbers_from_file(file):
 
 def _find(username, **kwargs):
     query_params = {
+        'IndexName': 'username-index',
         'KeyConditionExpression': Key('username').eq(username),
     }
     if kwargs:
@@ -29,7 +30,7 @@ def _find(username, **kwargs):
         elif len(filter_condition_expressions) == 1:
             query_params['FilterExpression'] = filter_condition_expressions[0]
     
-    data = table.query(**query_params)
+    data = contact.query(**query_params)
 
     return data['Items']
 
@@ -51,19 +52,19 @@ def _get(event, context):
 
 
 def _create(event, context):
-    # first delete all phone numbers from the contact_list
-    for phone_number in _find(
+    # first delete all contacts from the contact_list
+    for _contact in _find(
         username=_get_username(context),
         contact_list_id=event['contact-list-id']
     ):
-        table.delete_item(Key=phone_number['id'])
+        contact.delete_item(Key=_contact['id'])
 
     # then add the new phone numbers to to the contact_list
-    for phone_number in _get_phone_numbers_from_file(event['phone-numbers-csv']):
-        table.put_item(Item={
+    for _contact in _get_phone_numbers_from_file(event['phone-numbers-csv']):
+        contact.put_item(Item={
             'id': 'PHN' + str(uuid4().int)[0:16],
-            'contact_name': phone_number['name'],
-            'phone_number': phone_number['phone_number'],
+            'contact_name': _contact['name'],
+            'phone_number': _contact['phone_number'],
             'contact_list_id': event['contact-list-id'],
             'username': _get_username(context), 
             'created_at': datetime.now(tz=timezone('America/Denver')).isoformat(),

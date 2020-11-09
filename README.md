@@ -1,5 +1,5 @@
-# SMS Service -- Import
-Triggers from an AWS S3 CreateObject event and ingests a CSV file of SMS Messages to a DynamoDB.
+# SMS Service -- Contacts
+`/contacts` REST Endpoint
 
 ## Lambda
 
