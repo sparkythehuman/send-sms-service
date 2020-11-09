@@ -62,7 +62,7 @@ def _create(event, context):
     # then add the new phone numbers to to the contact_list
     for _contact in _get_phone_numbers_from_file(event['phone-numbers-csv']):
         contact.put_item(Item={
-            'id': 'PHN' + str(uuid4().int)[0:16],
+            'id': 'CPH' + str(uuid4().int)[0:16],
             'contact_name': _contact['name'],
             'phone_number': _contact['phone_number'],
             'contact_list_id': event['contact-list-id'],
