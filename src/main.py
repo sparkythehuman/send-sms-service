@@ -14,12 +14,8 @@ def _get_username(event):
     return event['requestContext']['authorizer']['claims']['cognito:username']
 
 
-def _get_phone_numbers_from_file(file):
-    for row in csv.DictReader(file.read().decode('utf-8-sig').split("\n")):
-        yield row
-
-def _get_phone_numbers(request):
-    for row in request['contacts']:
+def _get_phone_numbers_from_request(request):
+    for row in json.loads(request['contacts']):
         yield row
 
 
@@ -71,9 +67,7 @@ def _create(request, username):
         )
 
     # then add the new phone numbers to to the contact_list
-    print(request)
-    # for _contact in _get_phone_numbers_from_file(request['phone_numbers_csv']):
-    for _contact in _get_phone_numbers(request):
+    for _contact in _get_phone_numbers_from_request(request):
         contact.put_item(Item={
             'id': 'CPH' + str(uuid4().int)[0:16],
             'contact_name': _contact['name'],
@@ -95,8 +89,7 @@ def handle(event, context):
         'POST': _create
     }
     if operation in operations:
-        print(event)
-        return operations[operation](json.loads(event['body']), _get_username(event))
+        return operations[operation](json.loads(event['body'] or '{}'), _get_username(event))
     else:
         raise ValueError(f'Unable to run operation for HTTP METHOD: {operation}')
     
