@@ -49,8 +49,9 @@ def _response(phone_numbers):
 
 def _get(request, username):
     phone_numbers = _find(
-        username=username,
-        contact_list_id=request['contact_list_id']
+        username=username
+        # TODO: search by contact list
+        # contact_list_id=request['contact_list_id']
     )
 
     return _response(phone_numbers)
@@ -89,7 +90,9 @@ def handle(event, context):
         'POST': _create
     }
     if operation in operations:
-        return operations[operation](json.loads(event['body'] or '{}'), _get_username(event))
+        # TODO: handle query string params
+        request = json.load(event['body'] or '{}') if event['body'] else event['queryStringParameters']
+        return operations[operation](request, _get_username(event))
     else:
         raise ValueError(f'Unable to run operation for HTTP METHOD: {operation}')
     
