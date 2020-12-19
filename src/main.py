@@ -91,7 +91,7 @@ def handle(event, context):
     }
     if operation in operations:
         # TODO: handle query string params
-        request = json.load(event['body'] or '{}') if event['body'] else event['queryStringParameters']
+        request = json.loads(event['body'] or '{}') if event['body'] else event['queryStringParameters']
         return operations[operation](request, _get_username(event))
     else:
         raise ValueError(f'Unable to run operation for HTTP METHOD: {operation}')
